@@ -29,10 +29,11 @@ Full Example:
 ```go
 package main
 import (
+    "encoding/csv"
+    "io"
+    "os"
 
-"encoding/csv"
-"github.com/mchaynes/rsv"
-"os"
+    "github.com/mchaynes/rsv"
 )
 
 type Employee struct {
@@ -50,6 +51,9 @@ func main(){
     r := csv.NewReader(f)
     for {
         row, err := r.Read()
+        if err == io.EOF {
+            break
+        }
         if err != nil {
             panic(err)
         }
@@ -57,7 +61,8 @@ func main(){
         err = rsv.UnmarshalRow(row, &employee)
         if err != nil {
             panic(err)
-        }   
+        }
+        // do some work
     }
 }
 ```
@@ -77,7 +82,7 @@ fmt.Println(row)
 
 ## Comparisons
 
-| Library                           | Description                                                       |
-|---------------------------------- |-------------------------------------------------------------------|
-| https://github.com/gocarina/gocsv | Very good csv parsing library, requires header row to unmarshal   |
+| Library                           | Description                                                           |
+|---------------------------------- |-----------------------------------------------------------------------|
+| https://github.com/gocarina/gocsv | Very good csv parsing library, but requires header row to unmarshal   |
 
