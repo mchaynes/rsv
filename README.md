@@ -1,27 +1,37 @@
 # rsv, a very simple CSV marshaller/unmarshaller
 
 ## Background
-You ever have a CSV file that you need to decode into a struct? Its really annoying to do. 
-This library will hopefully make it less annoying, as it aims to plug into existing CSV parsing pipelines, but hopefully
-reduce the amount of boilerplate required to write. This means that most of the heavy lifting is left to the encoding/csv package.
+You ever have a CSV file that you need to decode into a struct? Its really annoying to do. rsv isn't trying to re-invent the
+wheel, it is meant to to be used with the `encoding/csv` package in the stdlib. Instead of manually building structs
+from the output of `csv.Read()`, this library allows you to specify the index of the row via a struct tag `idx`. This clearly
+is a fairly brittle way of dealing with CSVs, however in practice CSV files tend to be very static, so this is frequently the simplest way to read in a CSV file.
 
-This library *currently* supports Unmarshalling and Marshalling via an `idx` struct tag, which specifies what index in the
-row this struct tag should be marshalled and unmarshalled into.
+rsv also doesn't require header columns to be present. Very large data sets tend to be split into many smaller CSV files, and
+frequently don't have headers in the split files. rsv is designed with this in mind. 
+
+### Parsing
+rsv deals with the parsing the `[]string` into all number types, such as `float64`, `int64`, `uint`, etc. 
+If any of the values in the row fail to parse into their respective types, an `ErrFailedToParse` will be returned
+
 
 ## Usage
 
 ### Reading a CSV
 ```go
+package main
 type Employee struct {
     Id        string `idx:"0"`
     FirstName string `idx:"1"`
     LastName  string `idx:"2"`
-    Salary    int64  `idx:"3"` 
+    Salary    *int64  `idx:"3"` 
 }
 ....
 row := []string{"E1234", "John", "Smith", "40000"}
 employee := Employee{}
-err := rsv.UnmarshalRow(row, &employee)
+rsv.UnmarshalRow(row, &employee)
+// third index is empty, therefore salary will be `nil` since omitempty was specified
+row := []string{"E1234", "Jane", "Smit", ""}
+rsv.UnmarshalRow(row, &employee)
 ```
 
 
