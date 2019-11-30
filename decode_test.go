@@ -101,3 +101,31 @@ func TestUnmarshalRow_Panics(t *testing.T) {
 	}()
 	_ = UnmarshalRow([]string{}, struct{}{})
 }
+
+func BenchmarkUnmarshalRow(b *testing.B) {
+	type C struct {
+		D *int64   `idx:"0"`
+		E string   `idx:"1"`
+		F *float64 `idx:"2"`
+		G string   `idx:"3"`
+		H string   `idx:"4"`
+		I string   `idx:"5"`
+		J string   `idx:"6"`
+	}
+	type B struct {
+		C C
+	}
+	type A struct {
+		A B
+	}
+	row := []string{"1234", "abcdefg", "12.3456", "dkdkdkd", "adkdkd", "dkfjdkafl", "dkajff"}
+	b.RunParallel(func(pb *testing.PB) {
+		var a A
+		for pb.Next() {
+			err := UnmarshalRow(row, &a)
+			if err != nil {
+				b.Error(err)
+			}
+		}
+	})
+}

@@ -23,14 +23,14 @@ type Employee struct {
     Id        string `idx:"0"`
     FirstName string `idx:"1"`
     LastName  string `idx:"2"`
-    Salary    *int64  `idx:"3"` 
+    Salary    *int64  `idx:"3,omitempty"` 
 }
 ....
 row := []string{"E1234", "John", "Smith", "40000"}
 employee := Employee{}
 rsv.UnmarshalRow(row, &employee)
-// third index is empty, therefore salary will be `nil` since omitempty was specified
 row := []string{"E1234", "Jane", "Smit", ""}
+// third index is empty (""), therefore salary will be `nil` since omitempty was specified
 rsv.UnmarshalRow(row, &employee)
 ```
 
