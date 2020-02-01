@@ -66,9 +66,15 @@ func set(v reflect.Value, row []string, idx int, omitempty bool) error {
 		}
 		v.SetUint(i)
 	case reflect.Float32, reflect.Float64:
-		f, err := strconv.ParseFloat(row[idx], 64)
-		if err != nil {
-			return ErrFailedToParse{Value: row[idx], Err: err}
+		var (
+			f   float64
+			err error
+		)
+		if len(row[idx]) > 0 {
+			f, err = strconv.ParseFloat(row[idx], 64)
+			if err != nil {
+				return ErrFailedToParse{Value: row[idx], Err: err}
+			}
 		}
 		v.SetFloat(f)
 	case reflect.Ptr:
